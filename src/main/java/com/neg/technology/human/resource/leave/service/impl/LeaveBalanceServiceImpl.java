@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -76,31 +77,15 @@ public class LeaveBalanceServiceImpl implements LeaveBalanceService {
                     Employee employee = tuple.getT1();
                     LeaveType leaveType = tuple.getT2();
                     String leaveName = leaveType.getName().trim();
+
                     int requestedDays = request.getAmount() != null ? request.getAmount().intValue() : 0;
-
-                    int currentYear = java.time.LocalDate.now().getYear();
-
-                    int year = request.getDate() != null ? request.getDate() : LocalDate.now().getYear();
-
-                    LeaveBalance existingBalance = leaveBalanceRepository
-                            .findByEmployeeIdAndLeaveTypeIdAndDate(employee.getId(), leaveType.getId(), year)
-                            .orElse(null);
-
-
-
-                    if (existingBalance != null) {
-                        // Eğer kayıt eski yıla aitse -> yeni yıl için sıfırla
-                        if (existingBalance.getDate() == null || !existingBalance.getDate().equals(currentYear)) {
-                            existingBalance.setDate(currentYear);
-                            existingBalance.setAmount(BigDecimal.ZERO);
-                            existingBalance.setUsedDays(0);
-                        }
+                    if (requestedDays <= 0) {
+                        return Mono.error(new RuntimeException("Talep edilen gün sayısı 0'dan büyük olmalı"));
                     }
 
-                    int currentDays = existingBalance != null ? existingBalance.getAmount().intValue() : 0;
-                    int totalRequestedDays = currentDays + requestedDays;
+                    int requestYear = request.getDate() != null ? request.getDate() : LocalDate.now().getYear();
 
-                    // Max gün kuralları
+                    // max gün kuralı
                     int maxDays;
                     switch (leaveName) {
                         case "Ebeveyn İzni":
@@ -117,43 +102,64 @@ public class LeaveBalanceServiceImpl implements LeaveBalanceService {
                             maxDays = leaveType.getDefaultDays() != null ? leaveType.getDefaultDays() : Integer.MAX_VALUE;
                     }
 
-                    if (totalRequestedDays > maxDays) {
+                    // tüm yıllardaki balance'ları sırayla al
+                    List<LeaveBalance> balances = leaveBalanceRepository
+                            .findByEmployeeIdAndLeaveTypeIdOrderByDateAsc(employee.getId(), leaveType.getId());
+
+                    // sadece request yılına ait balance
+                    List<LeaveBalance> yearBalances = balances.stream()
+                            .filter(b -> b.getDate().equals(requestYear))
+                            .toList();
+
+                    int usedDaysInYear = yearBalances.stream()
+                            .mapToInt(LeaveBalance::getUsedDays)
+                            .sum();
+
+                    if (usedDaysInYear + requestedDays > maxDays) {
                         return Mono.error(new RuntimeException(
                                 leaveName + " için izin talebi maksimum gün sayısını aşıyor (" + maxDays + ")"
                         ));
                     }
 
-                    LeaveBalance balanceToSave;
-                    if (existingBalance != null) {
-                        existingBalance.setAmount(BigDecimal.valueOf(totalRequestedDays));
-                        balanceToSave = leaveBalanceRepository.save(existingBalance);
-                        Logger.logUpdated(LeaveBalance.class, balanceToSave.getId(), "Leave balance updated");
+                    // mevcut yıl balance
+                    LeaveBalance yearBalance = yearBalances.stream()
+                            .findFirst()
+                            .orElse(null);
+
+                    // yeni balance ekleme veya mevcut balance güncelleme
+                    if (yearBalance != null) {
+                        yearBalance.setAmount(yearBalance.getAmount().add(BigDecimal.valueOf(requestedDays)));
+                        yearBalance.setUsedDays(yearBalance.getUsedDays() + requestedDays);
+                        leaveBalanceRepository.save(yearBalance);
                     } else {
-                        LeaveBalance entity = LeaveBalance.builder()
+                        LeaveBalance newBalance = LeaveBalance.builder()
                                 .employee(employee)
                                 .leaveType(leaveType)
-                                .date(year) // yıl kaydı
+                                .date(requestYear)
                                 .amount(BigDecimal.valueOf(requestedDays))
-                                .usedDays(0)
+                                .usedDays(requestedDays)
                                 .build();
-                        balanceToSave = leaveBalanceRepository.save(entity);
-                        Logger.logCreated(LeaveBalance.class, balanceToSave.getId(), "Leave balance created");
+                        leaveBalanceRepository.save(newBalance);
+                        yearBalance = newBalance;
                     }
 
+                    // response hazırla
                     LeaveBalanceResponse response = LeaveBalanceResponse.builder()
-                            .id(balanceToSave.getId())
-                            .employeeFirstName(balanceToSave.getEmployee().getPerson().getFirstName())
-                            .employeeLastName(balanceToSave.getEmployee().getPerson().getLastName())
-                            .leaveTypeName(balanceToSave.getLeaveType().getName())
-                            .leaveTypeBorrowableLimit(balanceToSave.getLeaveType().getBorrowableLimit())
-                            .leaveTypeIsUnpaid(balanceToSave.getLeaveType().getIsUnpaid())
-                            .date(balanceToSave.getDate())
-                            .amount(balanceToSave.getAmount())
+                            .id(yearBalance.getId())
+                            .employeeFirstName(employee.getPerson().getFirstName())
+                            .employeeLastName(employee.getPerson().getLastName())
+                            .leaveTypeName(leaveType.getName())
+                            .leaveTypeBorrowableLimit(leaveType.getBorrowableLimit())
+                            .leaveTypeIsUnpaid(leaveType.getIsUnpaid())
+                            .date(yearBalance.getDate())
+                            .amount(yearBalance.getAmount())
                             .build();
 
                     return Mono.just(response);
                 });
     }
+
+
 
 
 
