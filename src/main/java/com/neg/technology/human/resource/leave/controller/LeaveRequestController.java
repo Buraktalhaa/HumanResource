@@ -1,6 +1,8 @@
 package com.neg.technology.human.resource.leave.controller;
 
+import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
+import com.neg.technology.human.resource.leave.model.request.EmployeeYearRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponse;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponseList;
@@ -129,4 +131,22 @@ public class LeaveRequestController {
         return leaveRequestService.getOverlapping(request)
                 .map(ResponseEntity::ok);
     }
+
+    @Operation(summary = "Get approved leave requests by employee")
+    @PostMapping("/getApprovedByEmployee")
+    public Mono<ResponseEntity<LeaveRequestResponseList>> getApprovedByEmployee(@Valid @RequestBody IdRequest request) {
+        return leaveRequestService.getApprovedByEmployee(request.getId())
+                .map(ResponseEntity::ok);
+    }
+
+    @Operation(summary = "Change leave request status")
+    @PostMapping("/changeStatus")
+    public Mono<ResponseEntity<LeaveRequestResponse>> changeLeaveRequestStatus(
+            @Valid @RequestBody ChangeLeaveRequestStatusRequest request) {
+
+        return leaveRequestService.changeStatus(request)
+                .map(ResponseEntity::ok);
+    }
+
+
 }

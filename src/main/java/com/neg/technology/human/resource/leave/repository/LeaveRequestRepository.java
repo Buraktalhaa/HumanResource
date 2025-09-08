@@ -42,4 +42,14 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
         AND lr.isCancelled = false
     """)
     List<LeaveRequest> findOverlappingRequests(Long employeeId, LocalDate startDate, LocalDate endDate);
+
+    // ✅ Onaylanmış izinleri yıl bazlı çekmek için
+    @Query("""
+    SELECT lr FROM LeaveRequest lr
+    WHERE lr.employee.id = :employeeId
+    AND lr.status = 'APPROVED'
+""")
+    List<LeaveRequest> findApprovedByEmployeeId(Long employeeId);
+
+
 }

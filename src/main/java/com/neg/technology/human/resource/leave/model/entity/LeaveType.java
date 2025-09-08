@@ -46,7 +46,6 @@ public class LeaveType extends AuditableEntity {
 
     @Column(name = "borrowable_limit")
     private Integer borrowableLimit;
-
     @Column(name = "max_days")
     private Integer maxDays;
 
