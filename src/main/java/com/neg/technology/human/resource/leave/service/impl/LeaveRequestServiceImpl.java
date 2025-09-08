@@ -4,11 +4,13 @@ import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.employee.model.request.EmployeeDateRangeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeDateRangeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeStatusRequest;
+import com.neg.technology.human.resource.employee.model.request.EmployeeYearRequest;
 import com.neg.technology.human.resource.employee.repository.EmployeeRepository;
 import com.neg.technology.human.resource.exception.ResourceNotFoundException;
 import com.neg.technology.human.resource.leave.model.entity.LeaveRequest;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
 import com.neg.technology.human.resource.leave.model.mapper.LeaveRequestMapper;
+import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponse;
@@ -224,4 +226,36 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             return new LeaveRequestResponseList(responses);
         });
     }
+
+    @Override
+    public Mono<LeaveRequestResponseList> getApprovedByEmployee(Long employeeId) {
+        return Mono.fromCallable(() -> {
+            List<LeaveRequest> list = leaveRequestRepository.findByEmployeeIdAndStatus(employeeId, "APPROVED");
+            List<LeaveRequestResponse> responses = list.stream()
+                    .map(LeaveRequestMapper::toDTO)
+                    .toList();
+            return new LeaveRequestResponseList(responses);
+        });
+    }
+
+    @Override
+    public Mono<LeaveRequestResponse> changeStatus(ChangeLeaveRequestStatusRequest dto) {
+        return Mono.fromCallable(() -> {
+            LeaveRequest existing = leaveRequestRepository.findById(dto.getLeaveRequestId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Leave Request", dto.getLeaveRequestId()));
+
+            existing.setStatus(dto.getStatus());
+            if (dto.getApprovalNote() != null) {
+                existing.setApprovalNote(dto.getApprovalNote());
+            }
+
+            LeaveRequest updated = leaveRequestRepository.save(existing);
+
+            Logger.logUpdated(LeaveRequest.class, updated.getId(), "LeaveRequest status changed");
+
+            return LeaveRequestMapper.toDTO(updated);
+        });
+    }
+
+
 }

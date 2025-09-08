@@ -1,6 +1,8 @@
 package com.neg.technology.human.resource.leave.validator;
 
+
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
+import com.neg.technology.human.resource.leave.model.request.EmployeeYearRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.leave.model.entity.LeaveBalance;
@@ -115,4 +117,14 @@ public class LeaveRequestValidator {
             throw new ValidationException("Leave request too far in advance");
         }
     }
+
+    public void validateEmployeeYearRequest(EmployeeYearRequest request) {
+        if (request.getEmployeeId() == null) {
+            throw new ValidationException("Employee ID is required");
+        }
+        if (request.getYear() == null || request.getYear() < 2000) {
+            throw new ValidationException("Year is invalid");
+        }
+    }
+
 }
