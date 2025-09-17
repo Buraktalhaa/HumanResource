@@ -1,8 +1,7 @@
 package com.neg.technology.human.resource.leave.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neg.technology.human.resource.utility.AuditableEntity;
+import com.neg.technology.human.resource.leave.model.enums.Gender; // Doğru import
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,18 +45,7 @@ public class LeaveType extends AuditableEntity {
 
     @Column(name = "borrowable_limit")
     private Integer borrowableLimit;
+
     @Column(name = "max_days")
     private Integer maxDays;
-
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public enum Gender {
-        MALE, FEMALE, NONE;
-
-        @JsonCreator
-        public static Gender fromString(String value) {
-            if (value == null) return null;
-            return Gender.valueOf(value.trim().toUpperCase());
-        }
-    }
 }

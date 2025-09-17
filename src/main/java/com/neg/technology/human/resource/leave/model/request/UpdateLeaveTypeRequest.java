@@ -1,6 +1,6 @@
 package com.neg.technology.human.resource.leave.model.request;
 
-import com.neg.technology.human.resource.leave.model.entity.LeaveType;
+import com.neg.technology.human.resource.leave.model.enums.Gender;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,8 +21,9 @@ public class UpdateLeaveTypeRequest {
     @NotNull(message = "isAnnual must not be null")
     private Boolean isAnnual;
 
+    // Alanın tipini güncelleyin:
     @NotNull(message = "genderRequired must not be null")
-    private LeaveType.Gender genderRequired;
+    private Gender genderRequired;
 
     private Integer defaultDays;
 

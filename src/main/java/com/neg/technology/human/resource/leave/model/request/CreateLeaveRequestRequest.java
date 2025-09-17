@@ -1,7 +1,7 @@
 package com.neg.technology.human.resource.leave.model.request;
 
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -29,9 +29,8 @@ public class CreateLeaveRequestRequest {
     @NotNull(message = "Requested days is required")
     private BigDecimal requestedDays;
 
-    @Size(min = 3, max = 50)
     @NotNull(message = "Status is required")
-    private String status;
+    private LeaveStatus status;
 
     private String reason;
 

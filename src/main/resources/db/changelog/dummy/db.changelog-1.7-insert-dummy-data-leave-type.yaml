@@ -45,21 +45,24 @@ databaseChangeLog:
                   name: updated_at
                   valueDate: "2023-01-01T08:00:00"
 
-        # Ebeveyn İzni
+        # Annelik İzni (yeni)
         - insert:
             tableName: leave_type
             columns:
               - column:
                   name: name
-                  value: "Ebeveyn İzni"
+                  value: "Annelik İzni"
               - column:
                   name: is_annual
                   valueBoolean: false
               - column:
                   name: gender_required
-                  value: null
+                  value: "FEMALE"
               - column:
                   name: default_days
+                  valueNumeric: 112
+              - column:
+                  name: max_days
                   valueNumeric: 112
               - column:
                   name: valid_after_days
@@ -85,6 +88,50 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   valueDate: "2023-01-02T08:00:00"
+
+        # Babalık İzni (yeni)
+        - insert:
+            tableName: leave_type
+            columns:
+              - column:
+                  name: name
+                  value: "Babalık İzni"
+              - column:
+                  name: is_annual
+                  valueBoolean: false
+              - column:
+                  name: gender_required
+                  value: "MALE"
+              - column:
+                  name: default_days
+                  valueNumeric: 5
+              - column:
+                  name: max_days
+                  valueNumeric: 5
+              - column:
+                  name: valid_after_days
+                  valueNumeric: 0
+              - column:
+                  name: valid_until_days
+                  valueNumeric: 365
+              - column:
+                  name: is_unpaid
+                  valueBoolean: false
+              - column:
+                  name: reset_period
+                  value: "ONCE"
+              - column:
+                  name: borrowable_limit
+                  valueNumeric: 0
+              - column:
+                  name: deleted
+                  value: "N"
+              - column:
+                  name: created_at
+                  valueDate: "2023-01-04T08:00:00"
+              - column:
+                  name: updated_at
+                  valueDate: "2023-01-04T08:00:00"
 
         # Ücretsiz İzin
         - insert:

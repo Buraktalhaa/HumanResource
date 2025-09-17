@@ -1,15 +1,15 @@
 package com.neg.technology.human.resource.leave.validator;
 
+import com.neg.technology.human.resource.leave.model.enums.Gender; // Correct import for the Gender enum
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveTypeRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveTypeRequest;
-import com.neg.technology.human.resource.leave.model.entity.LeaveType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
 public class LeaveTypeValidator {
 
-    private void validatorCommon(String name, Boolean isAnnual, LeaveType.Gender genderRequired, Boolean isUnpaid, Integer borrowableLimit) {
+    private void validatorCommon(String name, Boolean isAnnual, Gender genderRequired, Boolean isUnpaid, Integer borrowableLimit) {
         if (!StringUtils.hasText(name)) {
             throw new IllegalArgumentException("Leave type name must not be empty");
         }

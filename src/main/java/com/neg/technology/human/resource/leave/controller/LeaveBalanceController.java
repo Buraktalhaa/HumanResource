@@ -1,22 +1,20 @@
 package com.neg.technology.human.resource.leave.controller;
 
-import com.neg.technology.human.resource.leave.model.request.CreateLeaveBalanceRequest;
-import com.neg.technology.human.resource.leave.model.request.UpdateLeaveBalanceRequest;
+import com.neg.technology.human.resource.leave.model.request.*;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponse;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponseList;
 import com.neg.technology.human.resource.leave.service.LeaveBalanceService;
 import com.neg.technology.human.resource.leave.validator.LeaveBalanceValidator;
 import com.neg.technology.human.resource.utility.module.entity.request.IdRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeYearRequest;
-import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeYearRequest;
-import com.neg.technology.human.resource.leave.model.request.LeaveTypeYearRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -24,6 +22,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/leave_balances")
 @RequiredArgsConstructor
+@Validated
 public class LeaveBalanceController {
 
     private final LeaveBalanceService leaveBalanceService;
@@ -45,10 +44,17 @@ public class LeaveBalanceController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(summary = "Deduct leave from employee balance")
+    @PostMapping("/deduct")
+    public Mono<ResponseEntity<Void>> deductLeave(@Valid @RequestBody DeductLeaveRequest request) {
+        return leaveBalanceService.deductLeave(request)
+                .then(Mono.just(ResponseEntity.ok().build()));
+    }
+
+
     @Operation(summary = "Create leave balance")
     @PostMapping("/create")
     public Mono<ResponseEntity<LeaveBalanceResponse>> createLeaveBalance(@Valid @RequestBody CreateLeaveBalanceRequest dto) {
-        leaveBalanceValidator.validateCreateDTO(dto);
         return leaveBalanceService.create(dto)
                 .map(ResponseEntity::ok);
     }
@@ -56,7 +62,6 @@ public class LeaveBalanceController {
     @Operation(summary = "Update leave balance")
     @PostMapping("/update")
     public Mono<ResponseEntity<LeaveBalanceResponse>> updateLeaveBalance(@Valid @RequestBody UpdateLeaveBalanceRequest dto) {
-        leaveBalanceValidator.validateUpdateDTO(dto);
         return leaveBalanceService.update(dto)
                 .map(ResponseEntity::ok);
     }

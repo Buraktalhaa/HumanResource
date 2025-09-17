@@ -1,7 +1,7 @@
 package com.neg.technology.human.resource.leave.model.request;
 
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +14,8 @@ public class ChangeLeaveRequestStatusRequest {
     private Long leaveRequestId;
 
     @NotNull(message = "New status is required")
-    @Size(min = 3, max = 50)
-    private String status;
+    private LeaveStatus status; // String yerine enum
 
     private String approvalNote;
 }
+

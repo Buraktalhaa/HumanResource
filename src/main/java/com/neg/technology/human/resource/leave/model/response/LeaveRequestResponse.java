@@ -15,11 +15,9 @@ public class LeaveRequestResponse {
 
     private Long id;
 
-    // Employee names only
     private String employeeFirstName;
     private String employeeLastName;
 
-    // LeaveType name only
     private String leaveTypeName;
 
     private LocalDate startDate;
@@ -28,7 +26,6 @@ public class LeaveRequestResponse {
     private String status;
     private String reason;
 
-    // ApprovedBy employee names only
     private String approvedByFirstName;
     private String approvedByLastName;
 

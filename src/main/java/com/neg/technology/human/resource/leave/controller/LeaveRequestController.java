@@ -2,12 +2,10 @@ package com.neg.technology.human.resource.leave.controller;
 
 import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
-import com.neg.technology.human.resource.leave.model.request.EmployeeYearRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponse;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponseList;
 import com.neg.technology.human.resource.leave.service.LeaveRequestService;
-import com.neg.technology.human.resource.leave.validator.LeaveRequestValidator;
 import com.neg.technology.human.resource.utility.module.entity.request.IdRequest;
 import com.neg.technology.human.resource.utility.module.entity.request.StatusRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeDateRangeRequest;
@@ -29,7 +27,6 @@ import reactor.core.publisher.Mono;
 public class LeaveRequestController {
 
     private final LeaveRequestService leaveRequestService;
-    private final LeaveRequestValidator leaveRequestValidator;
 
     @Operation(summary = "Get all leave requests")
     @PostMapping("/getAll")
@@ -50,22 +47,14 @@ public class LeaveRequestController {
     @Operation(summary = "Create a new leave request")
     @PostMapping("/create")
     public Mono<ResponseEntity<LeaveRequestResponse>> createLeaveRequest(@Valid @RequestBody CreateLeaveRequestRequest dto) {
-        return Mono.fromCallable(() -> {
-                    leaveRequestValidator.validateCreateDTO(dto);
-                    return dto;
-                })
-                .flatMap(validatedDto -> leaveRequestService.create(validatedDto))
+        return leaveRequestService.create(dto)
                 .map(ResponseEntity::ok);
     }
 
     @Operation(summary = "Update an existing leave request")
     @PostMapping("/update")
     public Mono<ResponseEntity<LeaveRequestResponse>> updateLeaveRequest(@Valid @RequestBody UpdateLeaveRequestRequest dto) {
-        return Mono.fromCallable(() -> {
-                    leaveRequestValidator.validateUpdateDTO(dto);
-                    return dto;
-                })
-                .flatMap(validatedDto -> leaveRequestService.update(validatedDto))
+        return leaveRequestService.update(dto)
                 .map(ResponseEntity::ok);
     }
 
@@ -147,6 +136,4 @@ public class LeaveRequestController {
         return leaveRequestService.changeStatus(request)
                 .map(ResponseEntity::ok);
     }
-
-
 }

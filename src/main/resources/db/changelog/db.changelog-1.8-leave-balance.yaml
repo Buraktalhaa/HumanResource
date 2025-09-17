@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: "9"
-      author: "Burak Memiş"
+      author: "Haydar Memis"
       changes:
         - createTable:
             tableName: leave_balance
@@ -23,12 +23,14 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: date
-                  type: INTEGER
+                  name: effective_date
+                  type: DATE
               - column:
                   name: used_days
-                  type: INTEGER
+                  type: INT
                   defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
               - column:
                   name: amount
                   type: NUMERIC(19,2)

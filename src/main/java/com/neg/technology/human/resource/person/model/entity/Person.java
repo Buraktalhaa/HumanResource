@@ -1,5 +1,7 @@
 package com.neg.technology.human.resource.person.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.utility.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,7 +33,9 @@ public class Person extends AuditableEntity {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    private String gender;
+    @Column(name = "gender")
+    @Convert(converter = com.neg.technology.human.resource.person.model.converter.GenderConverter.class)
+    private Gender gender;
 
     @Column(columnDefinition = "TEXT")
     private String email;

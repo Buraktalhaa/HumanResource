@@ -1,6 +1,7 @@
 package com.neg.technology.human.resource.person.service;
 
 import com.neg.technology.human.resource.exception.ResourceNotFoundException;
+import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.person.model.entity.Person;
 import com.neg.technology.human.resource.person.model.mapper.PersonMapper;
 import com.neg.technology.human.resource.person.model.request.CreatePersonRequest;
@@ -73,10 +74,12 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Mono<List<PersonResponse>> getPersonsByGender(String gender) {
         return Mono.fromCallable(() -> {
-            List<Person> persons = personRepository.findByGenderIgnoreCase(gender);
+            Gender g = Gender.fromString(gender); // string'i enum'a çevir
+            List<Person> persons = personRepository.findByGender(g);
             return personMapper.toResponseList(persons);
         });
     }
+
 
     @Override
     public Mono<List<PersonResponse>> getPersonsBornBefore(String date) {
