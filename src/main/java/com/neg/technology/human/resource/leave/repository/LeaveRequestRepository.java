@@ -2,6 +2,7 @@ package com.neg.technology.human.resource.leave.repository;
 
 import com.neg.technology.human.resource.leave.model.entity.LeaveRequest;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,9 +17,10 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
 
     List<LeaveRequest> findByStartDateBetween(LocalDate start, LocalDate end);
 
-    List<LeaveRequest> findByEmployeeIdAndStatus(Long employeeId, String status);
+    // ✅ Enum parametreli
+    List<LeaveRequest> findByEmployeeIdAndStatus(Long employeeId, LeaveStatus status);
 
-    List<LeaveRequest> findByStatus(String status);  // örn: APPROVED, PENDING, REJECTED, CANCELLED
+    List<LeaveRequest> findByStatus(LeaveStatus status);
 
     List<LeaveRequest> findByIsCancelledTrue();
 
@@ -33,7 +35,7 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
             LocalDate endDate
     );
 
-    //  Collision check for requests made by the same employee
+    // Çakışma kontrolü
     @Query("""
         SELECT lr FROM LeaveRequest lr 
         WHERE lr.employee.id = :employeeId 
@@ -42,4 +44,12 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
         AND lr.isCancelled = false
     """)
     List<LeaveRequest> findOverlappingRequests(Long employeeId, LocalDate startDate, LocalDate endDate);
+
+    // ✅ Onaylanmış izinleri yıl bazlı çekmek için
+    @Query("""
+        SELECT lr FROM LeaveRequest lr
+        WHERE lr.employee.id = :employeeId
+        AND lr.status = com.neg.technology.human.resource.leave.model.enums.LeaveStatus.APPROVED
+    """)
+    List<LeaveRequest> findApprovedByEmployeeId(Long employeeId);
 }

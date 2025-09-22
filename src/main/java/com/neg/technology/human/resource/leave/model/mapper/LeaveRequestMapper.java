@@ -2,10 +2,11 @@ package com.neg.technology.human.resource.leave.model.mapper;
 
 import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.leave.model.entity.LeaveRequest;
+import com.neg.technology.human.resource.leave.model.entity.LeaveType;
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponse;
-import com.neg.technology.human.resource.leave.model.entity.LeaveType;
 
 public class LeaveRequestMapper {
     private LeaveRequestMapper(){}
@@ -19,7 +20,7 @@ public class LeaveRequestMapper {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .requestedDays(request.getRequestedDays())
-                .status(request.getStatus())
+                .status(request.getStatus() != null ? request.getStatus().name() : null)
                 .reason(request.getReason())
                 .approvedByFirstName(request.getApprovedBy().getPerson().getFirstName())
                 .approvedByLastName(request.getApprovedBy().getPerson().getLastName())
@@ -38,7 +39,7 @@ public class LeaveRequestMapper {
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .requestedDays(dto.getRequestedDays())
-                .status(dto.getStatus())
+                .status(dto.getStatus()) // No conversion needed, type is already LeaveStatus
                 .reason(dto.getReason())
                 .approvedBy(approver)
                 .build();
@@ -50,7 +51,10 @@ public class LeaveRequestMapper {
         if (dto.getStartDate() != null) entity.setStartDate(dto.getStartDate());
         if (dto.getEndDate() != null) entity.setEndDate(dto.getEndDate());
         if (dto.getRequestedDays() != null) entity.setRequestedDays(dto.getRequestedDays());
-        if (dto.getStatus() != null) entity.setStatus(dto.getStatus());
+        if (dto.getStatus() != null) {
+            entity.setStatus(LeaveStatus.fromString(dto.getStatus()));
+        }
+
         if (dto.getReason() != null) entity.setReason(dto.getReason());
         if (approver != null) entity.setApprovedBy(approver);
         if (dto.getApprovedAt() != null) entity.setApprovedAt(dto.getApprovedAt());

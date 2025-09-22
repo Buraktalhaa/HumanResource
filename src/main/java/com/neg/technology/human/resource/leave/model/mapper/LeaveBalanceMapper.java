@@ -33,7 +33,7 @@ public class LeaveBalanceMapper {
                 .leaveTypeName(leaveBalance.getLeaveType() != null ? leaveBalance.getLeaveType().getName() : null)
                 .leaveTypeBorrowableLimit(leaveBalance.getLeaveType() != null ? leaveBalance.getLeaveType().getBorrowableLimit() : null)
                 .leaveTypeIsUnpaid(leaveBalance.getLeaveType() != null ? leaveBalance.getLeaveType().getIsUnpaid() : null)
-                .date(leaveBalance.getDate())
+                .effectiveDate(leaveBalance.getEffectiveDate()) // Corrected to use existing field
                 .amount(leaveBalance.getAmount())
                 .build();
     }
@@ -52,7 +52,7 @@ public class LeaveBalanceMapper {
         return LeaveBalance.builder()
                 .employee(employee)
                 .leaveType(leaveType)
-                .date(dto.getDate())
+                .effectiveDate(dto.getEffectiveDate()) // Corrected to use existing field
                 .amount(dto.getAmount())
                 .build();
     }
@@ -67,8 +67,8 @@ public class LeaveBalanceMapper {
         if (leaveType != null) {
             existing.setLeaveType(leaveType);
         }
-        if (dto.getDate() != null) {
-            existing.setDate(dto.getDate());
+        if (dto.getEffectiveDate() != null) {
+            existing.setEffectiveDate(dto.getEffectiveDate()); // Corrected to use existing field
         }
         if (dto.getAmount() != null) {
             existing.setAmount(dto.getAmount());

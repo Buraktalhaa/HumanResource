@@ -3,6 +3,7 @@ package com.neg.technology.human.resource.leave.service;
 import com.neg.technology.human.resource.employee.model.request.EmployeeDateRangeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeDateRangeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeStatusRequest;
+import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveRequestResponse;
@@ -37,4 +38,10 @@ public interface LeaveRequestService {
     Mono<LeaveRequestResponseList> getByEmployeeLeaveTypeAndDateRange(EmployeeLeaveTypeDateRangeRequest request);
 
     Mono<LeaveRequestResponseList> getOverlapping(EmployeeDateRangeRequest request);
+
+    Mono<LeaveRequestResponseList> getApprovedByEmployee(Long employeeId);
+
+    Mono<LeaveRequestResponse> changeStatus(ChangeLeaveRequestStatusRequest request);
+
+
 }

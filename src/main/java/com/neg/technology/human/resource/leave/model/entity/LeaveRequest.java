@@ -1,6 +1,8 @@
+// LeaveRequest.java
 package com.neg.technology.human.resource.leave.model.entity;
 
 import com.neg.technology.human.resource.employee.model.entity.Employee;
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus; // LeaveStatus enum'ını import edin
 import com.neg.technology.human.resource.utility.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,8 +41,9 @@ public class LeaveRequest extends AuditableEntity {
     @Column(name = "requested_days")
     private BigDecimal requestedDays;
 
+    @Enumerated(EnumType.STRING) // Enum değerlerinin String olarak saklanmasını sağlar
     @Column(nullable = false)
-    private String status;
+    private LeaveStatus status;
 
     private String reason;
 

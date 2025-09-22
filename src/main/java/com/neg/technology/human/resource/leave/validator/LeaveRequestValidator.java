@@ -1,118 +1,118 @@
 package com.neg.technology.human.resource.leave.validator;
 
-import com.neg.technology.human.resource.leave.model.request.CreateLeaveRequestRequest;
-import com.neg.technology.human.resource.leave.model.request.UpdateLeaveRequestRequest;
 import com.neg.technology.human.resource.employee.model.entity.Employee;
-import com.neg.technology.human.resource.leave.model.entity.LeaveBalance;
+import com.neg.technology.human.resource.leave.model.entity.LeaveRequest;
+import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
-import com.neg.technology.human.resource.employee.repository.EmployeeRepository;
-import com.neg.technology.human.resource.leave.repository.LeaveBalanceRepository;
-import com.neg.technology.human.resource.leave.repository.LeaveTypeRepository;
-import jakarta.validation.ValidationException;
+import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
+import com.neg.technology.human.resource.leave.model.request.EmployeeLeaveTypeRequest;
+import com.neg.technology.human.resource.leave.repository.LeaveRequestRepository;
+import com.neg.technology.human.resource.leave.service.LeaveBalanceService;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.Month;
+import java.util.List;
+import java.util.Set;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class LeaveRequestValidator {
 
-    private final EmployeeRepository employeeRepository;
-    private final LeaveTypeRepository leaveTypeRepository;
-    private final LeaveBalanceRepository leaveBalanceRepository;
+    private final LeaveRequestRepository leaveRequestRepository;
+    private final LeaveBalanceService leaveBalanceService;
 
-    public void validateCreateDTO(CreateLeaveRequestRequest dto) {
-        validateCommon(dto.getEmployeeId(), dto.getLeaveTypeId(), dto.getStartDate(), dto.getEndDate());
+    private static final Set<LocalDate> OFFICIAL_HOLIDAYS = Set.of(
+            LocalDate.of(2025, Month.JANUARY, 1),
+            LocalDate.of(2025, Month.APRIL, 23),
+            LocalDate.of(2025, Month.MAY, 1),
+            LocalDate.of(2025, Month.MAY, 19),
+            LocalDate.of(2025, Month.JULY, 15),
+            LocalDate.of(2025, Month.AUGUST, 30),
+            LocalDate.of(2025, Month.OCTOBER, 29)
+    );
 
-        Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ValidationException("Employee not found"));
-
-        LeaveType leaveType = leaveTypeRepository.findById(dto.getLeaveTypeId())
-                .orElseThrow(() -> new ValidationException("Leave type not found"));
-
-        LeaveBalance balance = leaveBalanceRepository
-                .findByEmployeeIdAndLeaveTypeId(employee.getId(), leaveType.getId())
-                .orElseThrow(() -> new ValidationException("Leave balance not found"));
-
-        long requestedDays = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
-        if (requestedDays > balance.getAmount().intValue()) {
-            throw new ValidationException("Requested days exceed leave balance");
+    /**
+     * Checks if a given date is a holiday (official holiday or weekend).
+     */
+    public Mono<Boolean> isHoliday(LocalDate date) {
+        if (date == null) {
+            return Mono.error(new IllegalArgumentException("Date cannot be null"));
         }
-
-        validateExtraRules(employee, leaveType, dto.getStartDate());
+        boolean isHoliday = OFFICIAL_HOLIDAYS.contains(date) ||
+                date.getDayOfWeek() == DayOfWeek.SATURDAY ||
+                date.getDayOfWeek() == DayOfWeek.SUNDAY;
+        return Mono.just(isHoliday);
     }
 
-    public void validateUpdateDTO(UpdateLeaveRequestRequest dto) {
-        if (dto.getEmployeeId() != null && dto.getLeaveTypeId() != null &&
-                dto.getStartDate() != null && dto.getEndDate() != null) {
-
-            validateCommon(dto.getEmployeeId(), dto.getLeaveTypeId(), dto.getStartDate(), dto.getEndDate());
-
-            Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                    .orElseThrow(() -> new ValidationException("Employee not found"));
-
-            LeaveType leaveType = leaveTypeRepository.findById(dto.getLeaveTypeId())
-                    .orElseThrow(() -> new ValidationException("Leave type not found"));
-
-            validateExtraRules(employee, leaveType, dto.getStartDate());
-        }
-    }
-
-    private void validateCommon(Long employeeId, Long leaveTypeId, LocalDate startDate, LocalDate endDate) {
-        if (employeeId == null || leaveTypeId == null) {
-            throw new ValidationException("Employee ID and Leave Type ID are required");
+    /**
+     * Checks if an employee is eligible for a specific leave type based on criteria like gender.
+     */
+    public Mono<Void> validateEligibility(Employee employee, LeaveType leaveType) {
+        if (employee == null || leaveType == null) {
+            return Mono.error(new IllegalArgumentException("Employee or leave type cannot be null"));
         }
 
-        if (startDate == null || endDate == null) {
-            throw new ValidationException("Start date and End date are required");
-        }
+        Gender requiredGender = leaveType.getGenderRequired();
+        Gender employeeGender = employee.getPerson().getGender();
 
-        if (startDate.isAfter(endDate)) {
-            throw new ValidationException("Start date cannot be after end date");
-        }
-    }
-
-    private void validateExtraRules(
-            Employee employee,
-            LeaveType leaveType,
-            LocalDate startDate) {
-        if (!Boolean.TRUE.equals(employee.getIsActive())) {
-            throw new ValidationException("Inactive employees cannot request leave");
-        }
-
-        LeaveType.Gender requiredGender = leaveType.getGenderRequired();
-        String employeeGenderStr = employee.getPerson().getGender();
-
-        if (requiredGender != null) {
-            if (employeeGenderStr == null) {
-                throw new ValidationException("Employee gender is not specified.");
-            }
-
-            try {
-                LeaveType.Gender employeeGender = LeaveType.Gender.valueOf(employeeGenderStr.toUpperCase());
-
-                if (!requiredGender.equals(employeeGender)) {
-                    throw new ValidationException("This leave type is restricted to " +
-                            requiredGender.name().toLowerCase() + " employees only.");
-                }
-
-            } catch (IllegalArgumentException e) {
-                throw new ValidationException("Invalid gender value for employee: " + employeeGenderStr);
+        if (requiredGender != null && requiredGender != Gender.OTHER) {
+            if (requiredGender != employeeGender) {
+                return Mono.error(new IllegalArgumentException(
+                        "This leave type is not for the employee's gender."
+                ));
             }
         }
-
-
-        LocalDate now = LocalDate.now();
-        long daysUntilStart = ChronoUnit.DAYS.between(now, startDate);
-
-        if (leaveType.getValidAfterDays() != null && daysUntilStart < leaveType.getValidAfterDays()) {
-            throw new ValidationException("Leave request too early");
-        }
-
-        if (leaveType.getValidUntilDays() != null && daysUntilStart > leaveType.getValidUntilDays()) {
-            throw new ValidationException("Leave request too far in advance");
-        }
+        return Mono.empty();
     }
+
+    /**
+     * Checks if an employee has any overlapping leave requests for the specified dates.
+     */
+    public Mono<Boolean> hasOverlappingRequests(Long employeeId, LocalDate startDate, LocalDate endDate) {
+        List<LeaveRequest> overlappingRequests = leaveRequestRepository.findOverlappingRequests(employeeId, startDate, endDate);
+        return Mono.just(overlappingRequests.isEmpty());
+    }
+
+    /**
+     * Validates a new leave request before creation.
+     */
+    public Mono<Void> validateLeaveRequestCreation(Employee employee, LeaveType leaveType, LocalDate startDate, LocalDate endDate, BigDecimal requestedDays) {
+        return hasOverlappingRequests(employee.getId(), startDate, endDate)
+                .flatMap(isNotOverlapping -> {
+                    if (Boolean.FALSE.equals(isNotOverlapping)) {
+                        return Mono.error(new RuntimeException("An existing leave request already covers this date range."));
+                    }
+                    return validateEligibility(employee, leaveType);
+                })
+                .then(Mono.fromCallable(() -> {
+                    return leaveBalanceService.getByEmployeeAndLeaveType(new EmployeeLeaveTypeRequest(employee.getId(), leaveType.getId()))
+                            .doOnNext(balance -> {
+                                if (balance.getAmount().compareTo(requestedDays) < 0) {
+                                    throw new RuntimeException("Insufficient leave balance.");
+                                }
+                            })
+                            .then();
+                })).then();
+    }
+
+
+    public Mono<Void> validateStatusChange(LeaveRequest existingRequest, ChangeLeaveRequestStatusRequest dto) {
+        LeaveStatus oldStatus = existingRequest.getStatus();
+        LeaveStatus newStatus = dto.getStatus(); // Artık doğrudan enum geliyor
+
+        if (newStatus == LeaveStatus.APPROVED && (oldStatus == LeaveStatus.REJECTED || oldStatus == LeaveStatus.CANCELLED)) {
+            return Mono.error(new IllegalArgumentException("Cannot approve a rejected or cancelled leave request."));
+        }
+
+        // İsteğe bağlı olarak başka kurallar ekleyebilirsin
+        return Mono.empty();
+    }
+
 }

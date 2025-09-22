@@ -1,5 +1,7 @@
 package com.neg.technology.human.resource.person.model.entity;
 
+import com.neg.technology.human.resource.person.model.enums.Gender;
+import com.neg.technology.human.resource.person.model.enums.MaritalStatus;
 import com.neg.technology.human.resource.utility.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,7 +33,9 @@ public class Person extends AuditableEntity {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    private String gender;
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(columnDefinition = "TEXT")
     private String email;
@@ -42,5 +46,6 @@ public class Person extends AuditableEntity {
     private String address;
 
     @Column(name = "marital_status")
-    private String maritalStatus;
+    @Enumerated(EnumType.STRING)
+    private MaritalStatus maritalStatus;
 }

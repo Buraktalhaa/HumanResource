@@ -1,10 +1,11 @@
 package com.neg.technology.human.resource.leave.model.request;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -12,13 +13,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class UpdateLeaveBalanceRequest {
-    private Long employeeId;
-    private Long leaveTypeId;
     @NotNull
     private Long id;
-    @Min(1900)
-    private Integer date;
 
-    @Min(0)
+    private Long employeeId;
+
+    private Long leaveTypeId;
+
+    private LocalDate effectiveDate; // Corrected to use LocalDate for dates
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be a positive number")
     private BigDecimal amount;
 }

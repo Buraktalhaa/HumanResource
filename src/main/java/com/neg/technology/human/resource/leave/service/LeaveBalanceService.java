@@ -5,10 +5,12 @@ import com.neg.technology.human.resource.leave.model.request.CreateLeaveBalanceR
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveBalanceRequest;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponse;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponseList;
-import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeRequest;
+import com.neg.technology.human.resource.utility.module.entity.request.IdRequest;
+import com.neg.technology.human.resource.leave.model.request.EmployeeLeaveTypeRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeYearRequest;
 import com.neg.technology.human.resource.leave.model.request.LeaveTypeYearRequest;
-import com.neg.technology.human.resource.utility.module.entity.request.IdRequest;
+import com.neg.technology.human.resource.leave.model.request.AddLeaveRequest;
+import com.neg.technology.human.resource.leave.model.request.DeductLeaveRequest;
 import reactor.core.publisher.Mono;
 
 public interface LeaveBalanceService {
@@ -33,5 +35,7 @@ public interface LeaveBalanceService {
 
     Mono<LeaveBalanceResponseList> getByLeaveTypeAndYear(LeaveTypeYearRequest request);
 
+    Mono<Void> deductLeave(DeductLeaveRequest request);
 
+    Mono<Void> addLeave(AddLeaveRequest request);
 }

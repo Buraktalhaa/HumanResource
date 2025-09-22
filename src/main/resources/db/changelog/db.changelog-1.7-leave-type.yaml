@@ -31,9 +31,6 @@ databaseChangeLog:
               - column:
                   name: max_days
                   type: INTEGER
-                  defaultValueNumeric: 0
-                  constraints:
-                    nullable: false
               - column:
                   name: valid_after_days
                   type: INTEGER

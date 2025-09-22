@@ -1,6 +1,7 @@
 package com.neg.technology.human.resource.leave.model.request;
 
-import com.neg.technology.human.resource.leave.model.entity.LeaveType.Gender;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;

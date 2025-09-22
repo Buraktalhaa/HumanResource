@@ -2,22 +2,19 @@ package com.neg.technology.human.resource.leave.service.impl;
 
 import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.employee.service.EmployeeService;
-import com.neg.technology.human.resource.leave.model.entity.LeaveBalance;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
 import com.neg.technology.human.resource.leave.model.request.LeavePolicyRequest;
 import com.neg.technology.human.resource.leave.model.response.LeavePolicyResponse;
 import com.neg.technology.human.resource.leave.model.response.LeavePolicyResponseList;
-import com.neg.technology.human.resource.leave.repository.LeaveBalanceRepository;
 import com.neg.technology.human.resource.leave.repository.LeaveTypeRepository;
 import com.neg.technology.human.resource.leave.service.LeavePolicyService;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+import com.neg.technology.human.resource.exception.InvalidLeaveRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.math.BigDecimal;
 import java.time.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -25,7 +22,6 @@ import java.util.Set;
 public class LeavePolicyServiceImpl implements LeavePolicyService {
 
     private final EmployeeService employeeService;
-    private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveTypeRepository leaveTypeRepository;
 
     private static final Set<LocalDate> OFFICIAL_HOLIDAYS = Set.of(
@@ -55,10 +51,6 @@ public class LeavePolicyServiceImpl implements LeavePolicyService {
         return employee != null && employee.getPerson() != null ? employee.getPerson().getBirthDate() : null;
     }
 
-    private String getGender(Employee employee) {
-        return employee != null && employee.getPerson() != null ? employee.getPerson().getGender() : null;
-    }
-
     private int calculateYearsBetween(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) return 0;
         return Period.between(startDate, endDate).getYears();
@@ -81,29 +73,20 @@ public class LeavePolicyServiceImpl implements LeavePolicyService {
                     LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
                             .orElseThrow(() -> new RuntimeException("LeaveType not found: " + request.getLeaveTypeId()));
 
-                    String name = leaveType.getName().trim().toLowerCase();
+                    // Cinsiyete özel izin kontrolü
+                    Gender requiredGender = leaveType.getGenderRequired();
+                    Gender employeeGender = employee.getPerson().getGender();
 
-                    // Maternity Leave
-                    if ("maternity leave".equalsIgnoreCase(name)) {
-                        if (!"female".equalsIgnoreCase(employee.getPerson().getGender())) {
-                            return Mono.error(new RuntimeException("Maternity leave only for female employees"));
+                    if (requiredGender != null && requiredGender != Gender.OTHER) {
+                        if (requiredGender != employeeGender) {
+                            throw new InvalidLeaveRequestException(
+                                    "This leave type (" + leaveType.getName() + ") is not suitable for the employee's gender (" + employeeGender + ")."
+                            );
                         }
-                        boolean multiplePregnancy = Boolean.TRUE.equals(request.getMultiplePregnancy());
-                        int max = multiplePregnancy ? 140 : 112;
-                        return Mono.just(max);
                     }
 
-                    // Paternity Leave
-                    if ("paternity leave".equalsIgnoreCase(name)) {
-                        if (!"male".equalsIgnoreCase(employee.getPerson().getGender())) {
-                            return Mono.error(new RuntimeException("Paternity leave only for male employees"));
-                        }
-                        Integer max = leaveType.getMaxDays() != null ? leaveType.getMaxDays() : 5;
-                        return Mono.just(max);
-                    }
-
-                    // Annual Leave
-                    if ("annual leave".equalsIgnoreCase(name)) {
+                    // Yıllık İzin
+                    if (Boolean.TRUE.equals(leaveType.getIsAnnual())) {
                         int yearsWorked = 0;
                         if (employee.getEmploymentStartDate() != null) {
                             yearsWorked = (int) employee.getEmploymentStartDate()
@@ -117,13 +100,13 @@ public class LeavePolicyServiceImpl implements LeavePolicyService {
                         return Mono.just(max);
                     }
 
-                    // Diğer izin tipleri (Bereavement, Marriage, Birthday, Military vb.)
+                    // Diğer izin tipleri için max gün sayısını döndür
                     if (leaveType.getMaxDays() != null) {
                         return Mono.just(leaveType.getMaxDays());
                     }
 
-                    // Default: sınırsız izin
-                    return Mono.just(Integer.MAX_VALUE);
+                    // Default
+                    return Mono.just(leaveType.getDefaultDays() != null ? leaveType.getDefaultDays() : Integer.MAX_VALUE);
                 });
     }
 
