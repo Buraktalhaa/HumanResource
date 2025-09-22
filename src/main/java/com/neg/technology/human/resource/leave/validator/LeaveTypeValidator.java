@@ -1,8 +1,8 @@
 package com.neg.technology.human.resource.leave.validator;
 
-import com.neg.technology.human.resource.leave.model.enums.Gender; // Correct import for the Gender enum
 import com.neg.technology.human.resource.leave.model.request.CreateLeaveTypeRequest;
 import com.neg.technology.human.resource.leave.model.request.UpdateLeaveTypeRequest;
+import com.neg.technology.human.resource.person.model.enums.Gender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

@@ -3,22 +3,18 @@ package com.neg.technology.human.resource.leave.service.impl;
 import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.employee.service.EmployeeService;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
-import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.leave.model.request.LeavePolicyRequest;
 import com.neg.technology.human.resource.leave.model.response.LeavePolicyResponse;
 import com.neg.technology.human.resource.leave.model.response.LeavePolicyResponseList;
-import com.neg.technology.human.resource.leave.repository.LeaveBalanceRepository;
 import com.neg.technology.human.resource.leave.repository.LeaveTypeRepository;
 import com.neg.technology.human.resource.leave.service.LeavePolicyService;
+import com.neg.technology.human.resource.person.model.enums.Gender;
 import com.neg.technology.human.resource.exception.InvalidLeaveRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.math.BigDecimal;
 import java.time.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -26,7 +22,6 @@ import java.util.Set;
 public class LeavePolicyServiceImpl implements LeavePolicyService {
 
     private final EmployeeService employeeService;
-    private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveTypeRepository leaveTypeRepository;
 
     private static final Set<LocalDate> OFFICIAL_HOLIDAYS = Set.of(
@@ -82,7 +77,7 @@ public class LeavePolicyServiceImpl implements LeavePolicyService {
                     Gender requiredGender = leaveType.getGenderRequired();
                     Gender employeeGender = employee.getPerson().getGender();
 
-                    if (requiredGender != null && requiredGender != Gender.NONE) {
+                    if (requiredGender != null && requiredGender != Gender.OTHER) {
                         if (requiredGender != employeeGender) {
                             throw new InvalidLeaveRequestException(
                                     "This leave type (" + leaveType.getName() + ") is not suitable for the employee's gender (" + employeeGender + ")."

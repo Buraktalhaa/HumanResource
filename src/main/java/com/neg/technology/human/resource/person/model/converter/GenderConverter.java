@@ -1,6 +1,7 @@
 package com.neg.technology.human.resource.person.model.converter;
 
-import com.neg.technology.human.resource.leave.model.enums.Gender;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -18,7 +19,7 @@ public class GenderConverter implements AttributeConverter<Gender, String> {
         try {
             return Gender.valueOf(dbData.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            return Gender.NONE; // default değer
+            return Gender.OTHER; // default değer
         }
     }
 }

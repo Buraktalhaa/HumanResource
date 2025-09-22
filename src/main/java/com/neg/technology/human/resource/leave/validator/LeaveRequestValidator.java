@@ -2,14 +2,14 @@ package com.neg.technology.human.resource.leave.validator;
 
 import com.neg.technology.human.resource.employee.model.entity.Employee;
 import com.neg.technology.human.resource.leave.model.entity.LeaveRequest;
-import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.leave.model.enums.LeaveStatus;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
 import com.neg.technology.human.resource.leave.model.request.ChangeLeaveRequestStatusRequest;
 import com.neg.technology.human.resource.leave.model.request.EmployeeLeaveTypeRequest;
 import com.neg.technology.human.resource.leave.repository.LeaveRequestRepository;
-import com.neg.technology.human.resource.leave.repository.LeaveTypeRepository;
 import com.neg.technology.human.resource.leave.service.LeaveBalanceService;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.Month;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class LeaveRequestValidator {
         Gender requiredGender = leaveType.getGenderRequired();
         Gender employeeGender = employee.getPerson().getGender();
 
-        if (requiredGender != null && requiredGender != Gender.NONE) {
+        if (requiredGender != null && requiredGender != Gender.OTHER) {
             if (requiredGender != employeeGender) {
                 return Mono.error(new IllegalArgumentException(
                         "This leave type is not for the employee's gender."

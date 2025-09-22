@@ -43,7 +43,7 @@ public class LeaveRequest extends AuditableEntity {
 
     @Enumerated(EnumType.STRING) // Enum değerlerinin String olarak saklanmasını sağlar
     @Column(nullable = false)
-    private LeaveStatus status; // String yerine enum kullanıldı
+    private LeaveStatus status;
 
     private String reason;
 

@@ -1,11 +1,12 @@
 package com.neg.technology.human.resource.leave.validator;
 
 import com.neg.technology.human.resource.employee.model.entity.Employee;
-import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.exception.LeaveBalanceExceededException;
 import com.neg.technology.human.resource.exception.InvalidLeaveRequestException;
 import com.neg.technology.human.resource.leave.model.entity.LeaveBalance;
 import com.neg.technology.human.resource.leave.model.entity.LeaveType;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

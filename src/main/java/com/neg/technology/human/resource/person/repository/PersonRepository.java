@@ -1,7 +1,8 @@
 package com.neg.technology.human.resource.person.repository;
 
 import com.neg.technology.human.resource.person.model.entity.Person;
-import com.neg.technology.human.resource.leave.model.enums.Gender;
+import com.neg.technology.human.resource.person.model.enums.Gender;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

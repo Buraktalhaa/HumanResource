@@ -1,8 +1,8 @@
 package com.neg.technology.human.resource.person.service;
 
 import com.neg.technology.human.resource.exception.ResourceNotFoundException;
-import com.neg.technology.human.resource.leave.model.enums.Gender;
 import com.neg.technology.human.resource.person.model.entity.Person;
+import com.neg.technology.human.resource.person.model.enums.Gender;
 import com.neg.technology.human.resource.person.model.mapper.PersonMapper;
 import com.neg.technology.human.resource.person.model.request.CreatePersonRequest;
 import com.neg.technology.human.resource.person.model.request.UpdatePersonRequest;
@@ -12,7 +12,6 @@ import com.neg.technology.human.resource.utility.module.entity.request.IdRequest
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -74,7 +73,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Mono<List<PersonResponse>> getPersonsByGender(String gender) {
         return Mono.fromCallable(() -> {
-            Gender g = Gender.fromString(gender); // string'i enum'a çevir
+            Gender g = Gender.fromString(gender);
             List<Person> persons = personRepository.findByGender(g);
             return personMapper.toResponseList(persons);
         });

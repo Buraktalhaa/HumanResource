@@ -4,7 +4,6 @@ import com.neg.technology.human.resource.leave.model.request.*;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponse;
 import com.neg.technology.human.resource.leave.model.response.LeaveBalanceResponseList;
 import com.neg.technology.human.resource.leave.service.LeaveBalanceService;
-import com.neg.technology.human.resource.leave.validator.LeaveBalanceValidator;
 import com.neg.technology.human.resource.utility.module.entity.request.IdRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeYearRequest;
 import com.neg.technology.human.resource.employee.model.request.EmployeeLeaveTypeYearRequest;
@@ -26,7 +25,6 @@ import reactor.core.publisher.Mono;
 public class LeaveBalanceController {
 
     private final LeaveBalanceService leaveBalanceService;
-    private final LeaveBalanceValidator leaveBalanceValidator;
 
     @Operation(summary = "Get all leave balances")
     @PostMapping("/getAll")

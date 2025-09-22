@@ -1,7 +1,8 @@
 package com.neg.technology.human.resource.leave.model.entity;
 
+import com.neg.technology.human.resource.person.model.enums.Gender;
 import com.neg.technology.human.resource.utility.AuditableEntity;
-import com.neg.technology.human.resource.leave.model.enums.Gender; // Doğru import
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +22,7 @@ public class LeaveType extends AuditableEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "is_annual", nullable = false)
+    @Column(name = "is_annual", nullable = false) 
     private Boolean isAnnual;
 
     @Enumerated(EnumType.STRING)
